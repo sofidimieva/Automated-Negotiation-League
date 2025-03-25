@@ -114,29 +114,86 @@ class WorkingAgent(DefaultParty):
             return False
 
         progress = self.progress.get(time() * 1000)
-        utility = float(self.profile.getUtility(bid))
+        our_utility = float(self.profile.getUtility(bid))
 
-        # Smoother sigmoid threshold curve to allow earlier agreements
+        # Sigmoid-based dynamic acceptance threshold
         threshold = 0.9 * (1 - 1 / (1 + math.exp(-10 * (progress - 0.7))))
-        return utility >= threshold
 
+        if our_utility >= threshold:
+            return True  # good enough on our side
+
+        # Late-phase: only accept if bid is Pareto-efficient and jointly valuable
+        if progress > 0.9 and self.opponent_model:
+            opp_utility = self.opponent_model.get_predicted_utility(bid)
+            joint_utility = our_utility + opp_utility
+
+            # Require strong total utility and fairness
+            return joint_utility >= 1.6 and abs(our_utility - opp_utility) <= 0.2
+
+        return False
+
+
+    # def find_bid(self) -> Bid:
+    #     domain = self.profile.getDomain()
+    #     all_bids = AllBidsList(domain)
+
+    #     # Maintain top-N best-scoring bids for diversity and opponent friendliness
+    #     scored_bids = []
+    #     for _ in range(500):
+    #         bid = all_bids.get(randint(0, all_bids.size() - 1))
+    #         score = self.score_bid(bid)
+    #         scored_bids.append((score, bid))
+
+    #     # Sort by score (Pareto-inspired)
+    #     scored_bids.sort(reverse=True)
+    #     top_bids = [bid for _, bid in scored_bids[:10]]
+
+    #     # Pick one of top bids with slight randomness (avoid sticking to same bids)
+    #     return top_bids[randint(0, len(top_bids) - 1)]
     def find_bid(self) -> Bid:
         domain = self.profile.getDomain()
         all_bids = AllBidsList(domain)
 
-        # Maintain top-N best-scoring bids for diversity and opponent friendliness
-        scored_bids = []
+        candidate_bids = []
         for _ in range(500):
             bid = all_bids.get(randint(0, all_bids.size() - 1))
-            score = self.score_bid(bid)
-            scored_bids.append((score, bid))
+            candidate_bids.append(bid)
 
-        # Sort by score (Pareto-inspired)
+        # Build a list of Pareto-optimal bids
+        pareto_bids = []
+        for bid in candidate_bids:
+            our_util = self.profile.getUtility(bid)
+            opp_util = self.opponent_model.get_predicted_utility(bid) if self.opponent_model else 0.0
+
+            is_dominated = False
+            for other_bid in candidate_bids:
+                if other_bid == bid:
+                    continue
+
+                other_our_util = self.profile.getUtility(other_bid)
+                other_opp_util = self.opponent_model.get_predicted_utility(other_bid) if self.opponent_model else 0.0
+
+                if (other_our_util >= our_util and other_opp_util >= opp_util and
+                    (other_our_util > our_util or other_opp_util > opp_util)):
+                    is_dominated = True
+                    break
+
+            if not is_dominated:
+                pareto_bids.append(bid)
+
+        # If we found Pareto-optimal bids, prefer one with balanced utilities (Kalai-style)
+        if pareto_bids:
+            pareto_bids.sort(key=lambda b: abs(
+                float(self.profile.getUtility(b)) - self.opponent_model.get_predicted_utility(b)
+                if self.opponent_model else 0.0
+            ))
+            return pareto_bids[0]  # closest to equal utility
+
+        # Fallback to a high-scoring bid if no Pareto bid found
+        scored_bids = [(self.score_bid(b), b) for b in candidate_bids]
         scored_bids.sort(reverse=True)
-        top_bids = [bid for _, bid in scored_bids[:10]]
+        return scored_bids[0][1]
 
-        # Pick one of top bids with slight randomness (avoid sticking to same bids)
-        return top_bids[randint(0, len(top_bids) - 1)]
 
     def score_bid(self, bid: Bid) -> float:
         progress = self.progress.get(time() * 1000)
