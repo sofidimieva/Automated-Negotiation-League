@@ -198,7 +198,7 @@ class WorkingAgent(DefaultParty):
         opp_util = float(self.opponent_model.get_predicted_utility(bid))
         
         # Generate sample bids and compute Pareto frontier
-        sample = self._generate_bid_sample(1000)
+        sample = self._generate_bid_sample(5000)
         pareto_bids = self._compute_pareto_frontier(sample)
         
         # Calculate maximum possible Nash product in current frontier
@@ -247,6 +247,7 @@ class WorkingAgent(DefaultParty):
 
     def _generate_bid_sample(self, num_bids: int) -> List[Bid]:
         """Generate a sample of bids using AllBidsList for random selection."""
+
         all_bids = AllBidsList(self.domain)
         return [all_bids.get(randint(0, all_bids.size() - 1)) for _ in range(num_bids)]
 
@@ -270,19 +271,5 @@ class WorkingAgent(DefaultParty):
                 max_opp = util[1]
         return pareto
 
-    # def _select_optimal_bid(self, pareto_bids: List[Bid], progress: float) -> Bid:
-    #     alpha = 0.9  # Weight towards self utility
-    #     eps = 0.1    # Time pressure sensitivity
-    #     time_pressure = 1.0 - progress ** (1/eps)
-        
-    #     best_score = -1
-    #     best_bid = None
-    #     for bid in pareto_bids:
-    #         our_util = float(self.profile.getUtility(bid))
-    #         opp_util = float(self.opponent_model.get_predicted_utility(bid)) if self.opponent_model else 0.0
-    #         score = alpha * time_pressure * our_util + (1 - alpha * time_pressure) * opp_util
-    #         if score > best_score:
-    #             best_score = score
-    #             best_bid = bid
-    #     return best_bid if best_bid else self._generate_bid_sample(1)[0]
+    
 
