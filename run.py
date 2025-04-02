@@ -3,6 +3,7 @@ import time
 from pathlib import Path
 
 from utils.plot_trace import plot_trace
+from utils.pareto_plot import plot_trace_pareto
 from utils.runners import run_session
 
 RESULTS_DIR = Path("results", time.strftime('%Y%m%d-%H%M%S'))
@@ -37,8 +38,13 @@ session_results_trace, session_results_summary = run_session(settings)
 if not session_results_trace["error"]:
     plot_trace(session_results_trace, RESULTS_DIR.joinpath("trace_plot.html"))
 
+# plot trace compared to Pareto to html file
+if not session_results_trace["error"]:
+    plot_trace_pareto(session_results_trace, RESULTS_DIR.joinpath("trace_plot_pareto.html"))    
+
 # write results to file
 with open(RESULTS_DIR.joinpath("session_results_trace.json"), "w", encoding="utf-8") as f:
     f.write(json.dumps(session_results_trace, indent=2))
 with open(RESULTS_DIR.joinpath("session_results_summary.json"), "w", encoding="utf-8") as f:
     f.write(json.dumps(session_results_summary, indent=2))
+
