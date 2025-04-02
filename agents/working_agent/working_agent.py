@@ -221,6 +221,11 @@ class WorkingAgent(DefaultParty):
    
 
     def find_bid(self) -> Bid:
+    
+        # Ensure opponent model is initialized
+        if self.opponent_model is None:
+            self.opponent_model = OpponentModel(self.domain)
+
         # Generate large sample of bids
         sample_bids = self._generate_bid_sample(5000)
         
@@ -253,6 +258,10 @@ class WorkingAgent(DefaultParty):
 
 
     def _compute_pareto_frontier(self, bids: List[Bid]) -> List[Bid]:
+        # Ensure opponent model is initialized
+        if self.opponent_model is None:
+            self.opponent_model = OpponentModel(self.domain)
+
         utilities = []
         for bid in bids:
             our_util = float(self.profile.getUtility(bid))
