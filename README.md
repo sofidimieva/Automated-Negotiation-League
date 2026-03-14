@@ -1,59 +1,38 @@
-# Negotiation Practical Assignment
+# Automated Negotiation Agent
 
-This repository contains our implementation for the **Negotiation Practical Assignment** as part of the Automated Negotiation League (ANL) 2023, using the GeniusWeb framework. Our custom negotiation agent is located in the `working_agent/` directory.
+This repository contains a custom AI negotiation agent built using the GeniusWeb framework. The agent is designed to participate in bilateral negotiations under the Stacked Alternating Offers Protocol (SAOP) and was developed to compete within the Automated Negotiation League (ANL) 2023 environment.
+
+The core implementation of the custom agent is located in the `working_agent/` directory.
 
 ## Overview
 
-This project aims to develop an AI negotiation agent capable of participating in bilateral negotiations under the Stacked Alternating Offers Protocol (SAOP). The agent is evaluated across multiple negotiation domains and against various opponent agents.
+The primary goal of this project is to build an adaptive AI agent capable of maximizing utility and reaching Pareto-efficient agreements against various unknown opponent agents across multiple negotiation domains. 
 
-The project is organized into the following key phases:
+### Key Features
 
-### 1. Project Approach
+* **Adaptive Bidding Strategy:** The agent utilizes custom decision-making logic to propose offers based on utility maximization and time-dependent constraints.
+* **Opponent Modeling:** Dynamically models the opponent's preferences and negotiation strategy to adapt offers in real-time.
+* **Smart Acceptance Criteria:** Employs dynamic thresholds to evaluate and accept or reject incoming offers based on current utility and remaining negotiation time.
+* **Evaluation Framework:** Includes scripts to run standalone negotiation sessions or full round-robin tournaments to measure social welfare, Pareto efficiency, and individual utility.
 
-- **Research & Planning**
+## Repository Structure
 
-  - Study negotiation strategies, opponent modeling, and the GeniusWeb framework.
-  - Review relevant academic literature.
-  - Design the agent’s architecture and strategy.
-
-- **Implementation**
-
-  - Develop the agent's decision-making and negotiation logic.
-  - Implement opponent modeling and adaptive behavior.
-  - Integrate offer acceptance and rejection criteria.
-
-- **Evaluation & Reporting**
-
-  - Run tournaments and simulations to evaluate agent performance.
-  - Analyze results using negotiation metrics such as utility, social welfare, and Pareto efficiency.
-  - Document methodology, results, and analysis in a final report.
-
-## Agent Location
-
-Our custom agent is developed in the `working_agent/` directory. It is based on the competition's template agent and expanded with new strategies and opponent modeling techniques.
+* `working_agent/`: Contains the core logic, bidding strategy, and opponent modeling for the custom agent.
+* `results/`: Output directory for tournament and simulation logs.
 
 ## Installation
 
-We recommend using Python 3.9, as this version is used in the competition environment. To install dependencies:
+It is highly recommended to use **Python 3.9** to ensure full compatibility with the GeniusWeb framework. 
 
 ```bash
+# Create and activate a virtual environment
 python3.9 -m venv .venv
-source .venv/bin/activate  # or .venv\Scripts\activate on Windows
+
+# On macOS/Linux:
+source .venv/bin/activate  
+
+# On Windows:
+# .venv\Scripts\activate
+
+# Install the required dependencies
 pip install -r requirements.txt
-```
-
-## Running Experiments
-
-To test a single negotiation session with the agent:
-
-```bash
-python run.py
-```
-
-To run a full tournament where each agent negotiates with every other agent:
-
-```bash
-python run_tournament.py
-```
-
-Results are generated in the results folder and the plots can be visualized using Live Server
